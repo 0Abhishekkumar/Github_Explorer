@@ -1,0 +1,223 @@
+<html>
+<head>
+  <style>
+    /* Add some style to the page */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    #txt
+    {
+      margin-top: 30px;
+      font-size: 60px;
+      text-align: center;
+    }
+
+    #header {
+
+      margin-top: 5px;
+      margin-left: 60px;
+      margin-right: 30px;
+     background:linear-gradient(-135deg,#6666ff,#ff66ff);
+      color: white;
+      display: flex;
+      align-items: center;
+      height: 40px;
+      padding: 10px 60px;
+    }
+
+    #logo {
+      width: 60px;
+      height: 60px;
+      margin-right: 10px;
+    }
+
+    #search {
+      flex-grow: 1;
+      display: flex;
+      border: 3px solid black;
+      height: 50px;
+    }
+
+    #search-input {
+      flex-grow: 1;
+      border: none;
+      outline: none;
+      padding: 0 10px;
+      font-size: 26px;
+      text-align: center;
+    }
+
+    #search-button {
+     width: 100px;
+      border:2px solid red;
+      outline: none;
+      background-color:#66ff99;
+      color: black;
+      font-size: 25px;
+      font-weight:bolder;
+      cursor: pointer;
+    }
+
+    #content {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    #sidebar {
+      width: 330px;
+      margin-left: 60px;
+     /* background-color:silver;*/
+      background: linear-gradient(135deg,#153677,#4e085f);
+      overflow-y: auto;
+      border:3px solid black; 
+    }
+
+    #sidebar ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #sidebar li {
+      padding: 10px 20px;
+      border-bottom: 2px solid #e1e4e8;
+      color: white;
+    }
+
+    #sidebar li:hover {
+      background-color: white;
+      color: black;
+    }
+
+    #main {
+      flex-grow: 1;
+      padding: 20px;
+    }
+
+    #main h1 {
+      font-size: 24px;
+    }
+
+    #main p {
+      font-size: 16px;
+    } 
+  </style>
+</head>
+
+<body>
+  <div id="txt">GitHub Exprorer</div>
+  <div id="header">
+    <img id="logo" src="https://thewhiteh4t.github.io/images/posts/github_banner_min.jpg">
+    <div id="search">
+      <input id="search-input" type="text" placeholder="Search GitHub">
+      <button id="search-button">Search</button>
+    </div>
+  </div>
+  <div id="content">
+    <div id="sidebar">
+      <ul id="repositories"> 
+
+        <!-- Use JavaScript to fetch and display the repositories from GitHub API -->
+        <script>
+          function fetchRepositories() 
+          {
+            var xhr = new XMLHttpRequest();
+            var url = "https://api.github.com/repositories";
+            xhr.open("GET", url);
+
+            xhr.onload = function()
+            {
+              var data = JSON.parse(xhr.responseText);
+              for (var i = 0; i < data.length; i++) {
+                var repo = data[i];                
+                var name = repo.name;
+                var owner = repo.owner.login;
+                var li = document.createElement("li");
+                li.textContent = owner + "/" + name;
+                li.setAttribute("data-url", repo.url);
+
+                li.addEventListener("click", function()
+                {
+                  var url = this.getAttribute("data-url");
+                  fetchRepositoryDetails(url);
+                });
+                document.getElementById("repositories").appendChild(li);
+              }
+            };
+            xhr.send();
+          }
+
+          function fetchRepositoryDetails(url)
+          {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url);
+            xhr.onload = function()
+            {
+              var data = JSON.parse(xhr.responseText);
+              var name = data.name;
+              var description = data.description;
+              var language = data.language;
+              var stars = data.stargazers_count;
+              var forks = data.forks_count
+              var main = document.getElementById("main");
+              main.innerHTML = "";
+
+              var h1 = document.createElement("h1");
+              h1.textContent = name;
+              main.appendChild(h1);
+              var p1 = document.createElement("p");
+              p1.textContent = description;
+              main.appendChild(p1);
+              var p2 = document.createElement("p");
+              p2.textContent = "Language: " + language + " | Stars: " + stars + " | Forks: " + forks;
+              main.appendChild(p2);
+            };
+            xhr.send();
+          }
+          function searchRepositories(keyword) {
+            var xhr = new XMLHttpRequest();
+            var url = "https://api.github.com/search/repositories?q=" + keyword;
+            xhr.open("GET", url);
+
+            xhr.onload = function()
+            {
+              var data = JSON.parse(xhr.responseText);
+              var items = data.items;
+              var repositories = document.getElementById("repositories");
+              repositories.innerHTML = "";
+              for (var i = 0; i < items.length; i++) {
+                var repo = items[i];
+                var name = repo.name;
+                var owner = repo.owner.login;
+                var li = document.createElement("li");
+                li.textContent = owner + "/" + name;
+                li.setAttribute("data-url", repo.url);
+                li.addEventListener("click", function() {
+                  var url = this.getAttribute("data-url");
+                  fetchRepositoryDetails(url);
+                });
+                repositories.appendChild(li);
+              }
+            };
+            xhr.send();
+          }
+          fetchRepositories();
+
+          document.getElementById("search-button").addEventListener("click", function() {
+            var keyword = document.getElementById("search-input").value;
+            if (keyword) {
+              searchRepositories(keyword);
+            }
+          });
+
+        </script>
+      </ul>
+    </div>
+    <div id="main" style="background-image: url('C:\Users\HP\Desktop\img.jpg');">
+    </div>
+  </div>
+</body>
+</html>
